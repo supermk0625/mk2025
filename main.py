@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import koreanize_matplotlib
+import koreanzie_matplotlib
 import plotly.express as px
-
 
 # Streamlit App Title
 st.title("연도별 최고기온 분석")
@@ -25,19 +24,19 @@ data = load_data(file_path)
 
 # 데이터 유효성 검사
 if data is not None:
-    # 날짜 및 기온 컬럼 이름 설정 (예상되는 데이터 컬럼: Date, Temperature)
-    if '날짜' not in data.columns or '최고기온' not in data.columns:
-        st.error("데이터에 'Date' 또는 'Temperature' 컬럼이 없습니다.")
+    # 날짜 및 기온 컬럼 이름 설정 (예상되는 데이터 컬럼: 날짜, 최고기온(℃))
+    if '날짜' not in data.columns or '최고기온(℃)' not in data.columns:
+        st.error("데이터에 '날짜' 또는 '최고기온(℃)' 컬럼이 없습니다.")
     else:
-        # Date 컬럼을 datetime 형식으로 변환
-        data['Date'] = pd.to_datetime(data['Date'], errors='coerce')
+        # 날짜 컬럼을 datetime 형식으로 변환
+        data['날짜'] = pd.to_datetime(data['날짜'], errors='coerce')
         
         # 변환 실패한 날짜 제거
-        data = data.dropna(subset=['Date'])
+        data = data.dropna(subset=['날짜'])
         
         # 연도별 최고기온 계산
-        data['Year'] = data['Date'].dt.year
-        yearly_max_temp = data.groupby('Year')['Temperature'].max()
+        data['Year'] = data['날짜'].dt.year
+        yearly_max_temp = data.groupby('Year')['최고기온(℃)'].max()
         
         # 그래프 생성
         st.subheader("연도별 최고기온 그래프")
