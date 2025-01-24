@@ -4,63 +4,102 @@ import matplotlib.pyplot as plt
 import koreanize_matplotlib
 import plotly.express as px
 
-# CSV 파일 경로
-FILE_PATH = 'daily_temp.csv'
-
 # Streamlit 앱 제목
-st.title('일 평균 기온')
+st.title('월별 기온 변화 분석')
 
-# CSV 파일 읽기
+# 데이터 로드
 @st.cache_data
 def load_data():
     try:
-        # CSV 파일을 읽어들임
-        data = pd.read_csv(FILE_PATH)
-        # 날짜 형식이 있다면 파싱하여 datetime 형식으로 변경
-        data['Date'] = pd.to_datetime(data['Date'])
+        data = pd.read_csv('daily_temp.csv')
         return data
     except Exception as e:
-        st.error(f"파일을 읽는 데 오류가 발생했습니다: {e}")
+        st.error(f"Error loading data: {e}")
         return None
 
-# 데이터 로드
 data = load_data()
 
-# 데이터가 잘 로드되었으면
 if data is not None:
-    # 데이터 보기
-    st.subheader('데이터 미리보기')
-    st.write(data.head())
+    st.subheader('Dataset Overview')
 
-    # 기온 통계 정보
-    st.subheader('기온 통계')
-    st.write(data['Temperature'].describe())
+    # 데이터 미리보기
+    st.write("### First 5 rows of the dataset:")
+    st.dataframe(data.head())
 
-    # 기온 변화 시각화
-    st.subheader('기온 변화 그래프')
-    fig, ax = plt.subplots()
-    ax.plot(data['Date'], data['Temperature'], label='Temperature')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Temperature')
-    ax.set_title('Daily Temperature Over Time')
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
+    # 데이터 기본 정보
+    st.write("### Dataset Information:")
+    st.write(data.info())
 
-    # 월별 평균 기온
-    st.subheader('월별 평균 기온')
-    data['Month'] = data['Date'].dt.month
-    monthly_avg_temp = data.groupby('Month')['Temperature'].mean()
-    st.write(monthly_avg_temp)
+    # 데이터 통계 정보
+    st.write("### Descriptive Statistics:")
+    st.write(data.describe())
 
-    # 월별 평균 기온 시각화
-    fig2, ax2 = plt.subplots()
-    monthly_avg_temp.plot(kind='bar', ax=ax2)
-    ax2.set_xlabel('Month')
-    ax2.set_ylabel('Average Temperature')
-    ax2.set_title('Average Temperature by Month')
-    st.pyplot(fig2)
+    # 날짜 데이터를 datetime 형식으로 변환
+    if 'date' in data.columns:
+        try:
+            data['date'] = pd.to_datetime(data['date'])
+            data = data.sort_values(by='date')
+        except Exception as e:
+            st.error(f"Error processing date column: {e}")
 
-# 예외 처리: 데이터가 없을 경우
+    # 사용자 선택: 시각화 및 분석
+    st.subheader('Data Visualization and Analysis')
+
+    # 날짜 범위 선택 슬라이더
+    if 'date' in data.columns:
+        min_date = data['date'].min()
+        max_date = data['date'].max()
+
+        selected_range = st.slider(
+            "Select date range:",
+            min_value=min_date, 
+            max_value=max_date, 
+            value=(min_date, max_date)
+        )
+
+        filtered_data = data[(data['date'] >= selected_range[0]) & (data['date'] <= selected_range[1])]
+        st.write(f"### Filtered Data ({selected_range[0]} to {selected_range[1]}):")
+        st.dataframe(filtered_data)
+
+        # 시각화: 시간에 따른 온도 변화
+        if 'temperature' in data.columns:
+            st.write("### Temperature Over Time:")
+            plt.figure(figsize=(10, 5))
+            plt.plot(filtered_data['date'], filtered_data['temperature'], marker='o', linestyle='-', color='blue')
+            plt.title('Temperature Over Time')
+            plt.xlabel('Date')
+            plt.ylabel('Temperature')
+            plt.grid(True)
+            st.pyplot(plt)
+
+    # 특정 열의 히스토그램
+    if 'temperature' in data.columns:
+        st.write("### Temperature Distribution:")
+        plt.figure(figsize=(8, 5))
+        plt.hist(data['temperature'], bins=20, color='skyblue', edgecolor='black')
+        plt.title('Temperature Distribution')
+        plt.xlabel('Temperature')
+        plt.ylabel('Frequency')
+        st.pyplot(plt)
+
+    # 사용자 입력에 따른 필터링
+    st.subheader('Custom Filter Options')
+    if 'temperature' in data.columns:
+        temp_min = data['temperature'].min()
+        temp_max = data['temperature'].max()
+
+        temp_range = st.slider(
+            "Select temperature range:", 
+            min_value=float(temp_min), 
+            max_value=float(temp_max), 
+            value=(float(temp_min), float(temp_max))
+        )
+
+        temp_filtered_data = data[(data['temperature'] >= temp_range[0]) & (data['temperature'] <= temp_range[1])]
+        st.write(f"### Data for Temperatures Between {temp_range[0]} and {temp_range[1]}:")
+        st.dataframe(temp_filtered_data)
+
 else:
-    st.warning('데이터를 로드할 수 없습니다.')
+    st.error("Data could not be loaded. Please check the file path or data format.")
+
     
