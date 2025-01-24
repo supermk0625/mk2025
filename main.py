@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import koreanize_matplotlib
+import plotly.express as px
 
 # CSV 파일 경로
 FILE_PATH = 'daily_temp.csv'
