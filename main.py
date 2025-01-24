@@ -61,3 +61,4 @@ if data is not None:
 # 예외 처리: 데이터가 없을 경우
 else:
     st.warning('데이터를 로드할 수 없습니다.')
+    
