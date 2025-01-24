@@ -25,10 +25,10 @@ if data is not None:
     st.write(data.describe())
 
     # 날짜 데이터를 datetime 형식으로 변환
-    if 'date' in data.columns:
+    if '날짜' in data.columns:
         try:
-            data['date'] = pd.to_datetime(data['date'])
-            data = data.sort_values(by='date')
+            data['날짜'] = pd.to_datetime(data['날짜'])
+            data = data.sort_values(by='날짜')
         except Exception as e:
             st.error(f"Error processing date column: {e}")
 
@@ -36,7 +36,7 @@ if data is not None:
     st.subheader('Data Visualization and Analysis')
 
     # 날짜 범위 선택 슬라이더
-    if 'date' in data.columns:
+    if '날짜' in data.columns:
         min_date = data['date'].min()
         max_date = data['date'].max()
 
