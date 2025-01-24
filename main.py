@@ -26,7 +26,7 @@ data = load_data(file_path)
 # 데이터 유효성 검사
 if data is not None:
     # 날짜 및 기온 컬럼 이름 설정 (예상되는 데이터 컬럼: Date, Temperature)
-    if 'Date' not in data.columns or 'Temperature' not in data.columns:
+    if '날짜' not in data.columns or '최고기온' not in data.columns:
         st.error("데이터에 'Date' 또는 'Temperature' 컬럼이 없습니다.")
     else:
         # Date 컬럼을 datetime 형식으로 변환
