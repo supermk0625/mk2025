@@ -4,50 +4,45 @@ import matplotlib.pyplot as plt
 import koreanize_matplotlib
 import plotly.express as px
 
-# Streamlit App Title
-st.title("연도별 최고기온 분석")
+# 제목 설정
+st.title("연도별 최고 및 최저 기온 시각화")
 
-# 파일 경로 지정 및 데이터 로드
-file_path = 'daily_temp.csv'
+# 데이터 읽기
+data_path = 'daily_temp.csv'
+try:
+    data = pd.read_csv(data_path)
+except FileNotFoundError:
+    st.error(f"파일을 찾을 수 없습니다: {data_path}")
+    st.stop()
 
-# 데이터 로드
-@st.cache_data
-def load_data(file_path):
-    try:
-        data = pd.read_csv(file_path)
-        return data
-    except Exception as e:
-        st.error(f"파일을 로드하는 동안 오류가 발생했습니다: {e}")
-        return None
+# 데이터 확인
+data['날짜'] = pd.to_datetime(data['날짜'], errors='coerce')
+if data['날짜'].isnull().any():
+    st.error("날짜 형식이 잘못되었습니다. '날짜' 열에 올바른 날짜 형식이 포함되어야 합니다.")
+    st.stop()
 
-data = load_data(file_path)
+# 연도 추출 및 그룹화
+data['year'] = data['날짜'].dt.year
+if '기온' not in data.columns:
+    st.error("'기온' 열이 데이터에 포함되어 있어야 합니다.")
+    st.stop()
 
-# 데이터 유효성 검사
-if data is not None:
-    # 날짜 및 기온 컬럼 이름 설정 (예상되는 데이터 컬럼: 날짜, 최고기온(℃))
-    if '날짜' not in data.columns or '최고기온(℃)' not in data.columns:
-        st.error("데이터에 '날짜' 또는 '최고기온(℃)' 컬럼이 없습니다.")
-    else:
-        # 날짜 컬럼을 datetime 형식으로 변환
-        data['날짜'] = pd.to_datetime(data['날짜'], errors='coerce')
-        
-        # 변환 실패한 날짜 제거
-        data = data.dropna(subset=['날짜'])
-        
-        # 연도별 최고기온 계산
-        data['Year'] = data['날짜'].dt.year
-        yearly_max_temp = data.groupby('Year')['최고기온(℃)'].max()
-        
-        # 그래프 생성
-        st.subheader("연도별 최고기온 그래프")
-        fig, ax = plt.subplots()
-        yearly_max_temp.plot(kind='line', marker='o', ax=ax)
-        ax.set_title("연도별 최고기온")
-        ax.set_xlabel("연도")
-        ax.set_ylabel("기온 (°C)")
-        plt.grid()
-        
-        # 그래프 출력
-        st.pyplot(fig)
-else:
-    st.warning("데이터를 로드할 수 없습니다. 파일 경로를 확인해 주세요.")
+# 연도별 최고기온 및 최저기온 계산
+annual_stats = data.groupby('year')['기온'].agg(['max', 'min']).reset_index()
+annual_stats.rename(columns={'max': 'max_temp', 'min': 'min_temp'}, inplace=True)
+
+# 그래프 생성
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(annual_stats['year'], annual_stats['max_temp'], label='최고 기온', color='red', marker='o')
+ax.plot(annual_stats['year'], annual_stats['min_temp'], label='최저 기온', color='blue', marker='o')
+
+# 그래프 꾸미기
+ax.set_title('연도별 최고 및 최저 기온', fontsize=16)
+ax.set_xlabel('연도', fontsize=12)
+ax.set_ylabel('기온 (°C)', fontsize=12)
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.7)
+
+# 그래프 출력
+st.pyplot(fig)
+
