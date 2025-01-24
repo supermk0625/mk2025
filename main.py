@@ -5,7 +5,7 @@ import koreanize_matplotlib
 import plotly.express as px
 
 # Streamlit 앱 제목
-st.title('월별 기온 변화 분석')
+st.title('기후 데이터 분석')
 
 # 데이터 로드
 @st.cache_data
@@ -20,18 +20,8 @@ def load_data():
 data = load_data()
 
 if data is not None:
-    st.subheader('Dataset Overview')
-
-    # 데이터 미리보기
-    st.write("### First 5 rows of the dataset:")
-    st.dataframe(data.head())
-
-    # 데이터 기본 정보
-    st.write("### Dataset Information:")
-    st.write(data.info())
-
     # 데이터 통계 정보
-    st.write("### Descriptive Statistics:")
+    st.write("### 데이터 통계정보")
     st.write(data.describe())
 
     # 날짜 데이터를 datetime 형식으로 변환
