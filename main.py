@@ -8,7 +8,7 @@ import plotly.express as px
 FILE_PATH = 'daily_temp.csv'
 
 # Streamlit 앱 제목
-st.title('Daily Temperature Analysis')
+st.title('일 평균 기온')
 
 # CSV 파일 읽기
 @st.cache_data
