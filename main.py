@@ -5,7 +5,7 @@ import koreanize_matplotlib
 import plotly.express as px
 
 # Streamlit App Title
-st.title("연도별 최고기온 분석")
+st.title("연도별 최고 & 최저 기온 분석")
 
 # 파일 경로 지정 및 데이터 로드
 file_path = 'daily_temp.csv'
